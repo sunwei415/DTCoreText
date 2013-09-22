@@ -32,7 +32,7 @@
  @param attributedString The `NSAttributedString` to layout for
  @returns An initialized layouter
  */
-- (id)initWithAttributedString:(NSAttributedString *)attributedString;
+- (id)initWithAttributedString:(NSMutableAttributedString *)attributedString;
 
 
 /**
@@ -59,7 +59,7 @@
 /**
  The attributed string that the layouter currently owns
  */
-@property (nonatomic, strong) NSAttributedString *attributedString;
+@property (nonatomic, strong) NSMutableAttributedString *attributedString;
 
 /**
  The internal framesetter of the receiver

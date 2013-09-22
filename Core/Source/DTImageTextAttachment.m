@@ -19,8 +19,14 @@ static NSCache *imageCache = nil;
 
 
 @implementation DTImageTextAttachment
+
+- (id)init
 {
-	DTImage *_image;
+    if (self=[super init]) {
+        
+    }
+    
+    return self;
 }
 
 - (id)initWithElement:(DTHTMLElement *)element options:(NSDictionary *)options
@@ -41,7 +47,7 @@ static NSCache *imageCache = nil;
 
 - (id)initWithImage:(DTImage *)image
 {
-	self = [super init];
+	self = [self init];
 	
 	if (self)
 	{
@@ -288,7 +294,7 @@ static NSCache *imageCache = nil;
 		}
 		else
 		{
-			urlString = [_contentURL relativeString];
+			urlString = [_contentURL absoluteString];
 		}
 	}
 	else
@@ -361,7 +367,7 @@ static NSCache *imageCache = nil;
 	}
 	
 	// end
-	[retString appendString:@" />"];
+	[retString appendString:@">"];
 	
 	return retString;
 }

@@ -17,6 +17,8 @@
 #import "DTTextHTMLElement.h"
 #import "NSString+DTUtilities.h"
 
+#import "NSArray+DTError.h"
+
 @interface DTHTMLElement ()
 
 @property (nonatomic, strong) NSMutableDictionary *fontCache;
@@ -251,7 +253,7 @@ NSDictionary *_classesForNames = nil;
 		if (___useiOS6Attributes)
 		{
 			// only a single shadow supported
-			NSDictionary *firstShadow = [_shadows objectAtIndex:0];
+			NSDictionary *firstShadow = [_shadows objectAtIndex:0 outOfRange:nil];
 			
 			NSShadow *shadow = [[NSShadow alloc] init];
 			shadow.shadowOffset = [[firstShadow objectForKey:@"Offset"] CGSizeValue];
@@ -378,7 +380,7 @@ NSDictionary *_classesForNames = nil;
 						{
 							while ([[nodeString string] hasPrefix:@" "])
 							{
-								nodeString = [nodeString attributedSubstringFromRange:NSMakeRange(1, [nodeString length]-1)];
+								nodeString = [nodeString attributedSubstringFromRange:NSMakeRange(1, [nodeString length]-1) outOfRange:nil];
 							}
 						}
 					}
@@ -393,17 +395,20 @@ NSDictionary *_classesForNames = nil;
 		// block-level elements get space trimmed and a newline
 		if (_displayStyle != DTHTMLElementDisplayStyleInline)
 		{
+            //coscico code begin
+            // we don't want to trim whitespace, so comment the triming logic here.
 			// trim off whitespace prefix
-			while ([[tmpString string] hasPrefix:@" "])
-			{
-				[tmpString deleteCharactersInRange:NSMakeRange(0, 1)];
-			}
+//			while ([[tmpString string] hasPrefix:@" "])
+//			{
+//				[tmpString deleteCharactersInRange:NSMakeRange(0, 1)];
+//			}
 			
 			// trim off whitespace suffix
-			while ([[tmpString string] hasSuffix:@" "])
-			{
-				[tmpString deleteCharactersInRange:NSMakeRange([tmpString length]-1, 1)];
-			}
+//			while ([[tmpString string] hasSuffix:@" "])
+//			{
+//				[tmpString deleteCharactersInRange:NSMakeRange([tmpString length]-1, 1)];
+//			}
+            //coscico code end
 			
 			if (![self.name isEqualToString:@"html"] && ![self.name isEqualToString:@"body"])
 			{
@@ -1093,7 +1098,7 @@ NSDictionary *_classesForNames = nil;
 			else
 			{
 				// didn't have any blocks before, start new array
-				blocks = [NSArray arrayWithObject:newBlock];
+				blocks = [NSMutableArray arrayWithObject:newBlock];
 			}
 			
 			self.paragraphStyle.textBlocks = blocks;

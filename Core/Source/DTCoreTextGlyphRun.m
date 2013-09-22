@@ -15,6 +15,8 @@
 #import "NSDictionary+DTCoreText.h"
 #import "DTWeakSupport.h"
 
+#import "NSArray+DTError.h"
+
 @interface DTCoreTextGlyphRun ()
 
 @property (nonatomic, assign) CGRect frame;
@@ -389,7 +391,7 @@
 	
 	if (_line.writingDirectionIsRightToLeft)
 	{
-		isTrailing = (self == [[_line glyphRuns] objectAtIndex:0]);
+		isTrailing = (self == [[_line glyphRuns] objectAtIndex:0 outOfRange:nil]);
 	}
 	else
 	{

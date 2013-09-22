@@ -9,6 +9,8 @@
 #import <ImageIO/ImageIO.h>
 #import "DTLazyImageView.h"
 
+#define TIMEOUT_INTERVAL 20.0
+
 static NSCache *_imageCache = nil;
 
 NSString * const DTLazyImageViewWillStartDownloadNotification = @"DTLazyImageViewWillStartDownloadNotification";
@@ -67,12 +69,12 @@ NSString * const DTLazyImageViewDidFinishDownloadNotification = @"DTLazyImageVie
 	{
 		if (!_urlRequest)
 		{
-			_urlRequest = [[NSMutableURLRequest alloc] initWithURL:url cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:10.0];
+			_urlRequest = [[NSMutableURLRequest alloc] initWithURL:url cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:TIMEOUT_INTERVAL];
 		}
 		else
 		{
 			[_urlRequest setCachePolicy:NSURLRequestReturnCacheDataElseLoad];
-			[_urlRequest setTimeoutInterval:10.0];
+			[_urlRequest setTimeoutInterval:TIMEOUT_INTERVAL];
 		}
 		
 		_connection = [[NSURLConnection alloc] initWithRequest:_urlRequest delegate:self startImmediately:NO];
@@ -107,8 +109,8 @@ NSString * const DTLazyImageViewDidFinishDownloadNotification = @"DTLazyImageVie
 			return;
 		}
 		
-		[self loadImageAtURL:_url];
-	}	
+//		[self loadImageAtURL:_url];
+	}
 }
 
 - (void)cancelLoading

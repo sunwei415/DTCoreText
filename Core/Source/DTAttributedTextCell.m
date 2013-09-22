@@ -51,7 +51,7 @@
 	}
 	else
 	{
-		CGFloat neededContentHeight = [self requiredRowHeightInTableView:[self _containingTableView]];
+		CGFloat neededContentHeight = [self requiredRowHeightInTableView:(UITableView *)self.superview];
 	
 		// after the first call here the content view size is correct
 		CGRect frame = CGRectMake(0, 0, self.contentView.bounds.size.width, neededContentHeight);
@@ -59,33 +59,11 @@
 	}
 }
 
-- (UITableView *)_containingTableView
-{
-	UIView *tableView = self.superview;
-	
-	while (tableView)
-	{
-		if ([tableView isKindOfClass:[UITableView class]])
-		{
-			return (UITableView *)tableView;
-		}
-		
-		tableView = tableView.superview;
-	}
-	
-	return nil;
-}
-
 - (void)willMoveToSuperview:(UIView *)newSuperview
 {
 	UITableView *tableView = (UITableView *)newSuperview;
 	
-	if (![tableView isKindOfClass:[UITableView class]])
-	{
-		tableView = (UITableView *)tableView.superview;
-	}
-	
-	if ([self _containingTableView].style == UITableViewStyleGrouped)
+	if (tableView.style == UITableViewStyleGrouped)
 	{
 		// need no background because otherwise this would overlap the rounded corners
 		_attributedTextContextView.backgroundColor = [DTColor clearColor];
@@ -93,8 +71,6 @@
 	
 	[super willMoveToSuperview:newSuperview];
 }
-
-
 
 - (CGFloat)requiredRowHeightInTableView:(UITableView *)tableView
 {
@@ -117,6 +93,8 @@
 			break;
 		case UITableViewCellAccessoryNone:
 			break;
+        case UITableViewCellAccessoryDetailButton:
+            break;
 	}
 	
 	// reduce width for grouped table views
@@ -155,13 +133,13 @@
 	_htmlHash = newHash;
 	
 	NSData *data = [html dataUsingEncoding:NSUTF8StringEncoding];
-	NSAttributedString *string = [[NSAttributedString alloc] initWithHTMLData:data documentAttributes:NULL];
+	NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithHTMLData:data documentAttributes:NULL];
 	self.attributedString = string;
 	
 	[self setNeedsLayout];
 }
 
-- (void)setAttributedString:(NSAttributedString *)attributedString
+- (void)setAttributedString:(NSMutableAttributedString *)attributedString
 {
 	// passthrough
 	self.attributedTextContextView.attributedString = attributedString;

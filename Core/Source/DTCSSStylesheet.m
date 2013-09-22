@@ -13,7 +13,8 @@
 #import "NSScanner+HTML.h"
 #import "NSString+CSS.h"
 #import "NSString+HTML.h"
-
+#import "NSString+DTUtilities.h"
+#import "NSMutableDictionary+DTUtils.h"
 
 // external symbols generated via custom build rule and xxd
 extern unsigned char default_css[];
@@ -95,8 +96,8 @@ extern unsigned int default_css_len;
 		
 		if ([shortHand isEqualToString:@"inherit"])
 		{
-			[styles setObject:@"inherit" forKey:@"list-style-type"];
-			[styles setObject:@"inherit" forKey:@"list-style-position"];
+			[styles setNilTolerantObject:@"inherit" forNilTolerantKey:@"list-style-type"];
+			[styles setNilTolerantObject:@"inherit" forNilTolerantKey:@"list-style-position"];
 			return;
 		}
 		
@@ -117,7 +118,7 @@ extern unsigned int default_css_len;
 				
 				if ([scanner scanCSSURL:NULL])
 				{
-					[styles setObject:oneComponent forKey:@"list-style-image"];
+					[styles setNilTolerantObject:oneComponent forNilTolerantKey:@"list-style-image"];
 					
 					continue;
 				}
@@ -130,7 +131,7 @@ extern unsigned int default_css_len;
 				
 				if (listStyleType != DTCSSListStyleTypeInvalid)
 				{
-					[styles setObject:oneComponent forKey:@"list-style-type"];
+					[styles setNilTolerantObject:oneComponent forNilTolerantKey:@"list-style-type"];
 					
 					typeWasSet = YES;
 					continue;
@@ -144,7 +145,7 @@ extern unsigned int default_css_len;
 				
 				if (listStylePosition != DTCSSListStylePositionInvalid)
 				{
-					[styles setObject:oneComponent forKey:@"list-style-position"];
+					[styles setNilTolerantObject:oneComponent forNilTolerantKey:@"list-style-position"];
 
 					positionWasSet = YES;
 					continue;
@@ -256,12 +257,12 @@ extern unsigned int default_css_len;
 		// size and family are mandatory, without them this is invalid
 		if ([fontSize length] && [fontFamily length])
 		{
-			[styles setObject:fontStyle forKey:@"font-style"];
-			[styles setObject:fontWeight forKey:@"font-weight"];
-			[styles setObject:fontVariant forKey:@"font-variant"];
-			[styles setObject:fontSize forKey:@"font-size"];
-			[styles setObject:lineHeight forKey:@"line-height"];
-			[styles setObject:fontFamily forKey:@"font-family"];
+			[styles setNilTolerantObject:fontStyle forNilTolerantKey:@"font-style"];
+			[styles setNilTolerantObject:fontWeight forNilTolerantKey:@"font-weight"];
+			[styles setNilTolerantObject:fontVariant forNilTolerantKey:@"font-variant"];
+			[styles setNilTolerantObject:fontSize forNilTolerantKey:@"font-size"];
+			[styles setNilTolerantObject:lineHeight forNilTolerantKey:@"line-height"];
+			[styles setNilTolerantObject:fontFamily forNilTolerantKey:@"font-family"];
 		}
 	}
 	
@@ -311,22 +312,22 @@ extern unsigned int default_css_len;
 		
 		if (![styles objectForKey:@"margin-top"])
 		{
-			[styles setObject:topMargin forKey:@"margin-top"];
+			[styles setNilTolerantObject:topMargin forNilTolerantKey:@"margin-top"];
 		}
 		
 		if (![styles objectForKey:@"margin-right"])
 		{
-			[styles setObject:rightMargin forKey:@"margin-right"];
+			[styles setNilTolerantObject:rightMargin forNilTolerantKey:@"margin-right"];
 		}
 		
 		if (![styles objectForKey:@"margin-bottom"])
 		{
-			[styles setObject:bottomMargin forKey:@"margin-bottom"];
+			[styles setNilTolerantObject:bottomMargin forNilTolerantKey:@"margin-bottom"];
 		}
 		
 		if (![styles objectForKey:@"margin-left"])
 		{
-			[styles setObject:leftMargin forKey:@"margin-left"];
+			[styles setNilTolerantObject:leftMargin forNilTolerantKey:@"margin-left"];
 		}
 		
 		// remove the shorthand
@@ -379,22 +380,22 @@ extern unsigned int default_css_len;
 		
 		if (![styles objectForKey:@"padding-top"])
 		{
-			[styles setObject:topPadding forKey:@"padding-top"];
+			[styles setNilTolerantObject:topPadding forNilTolerantKey:@"padding-top"];
 		}
 		
 		if (![styles objectForKey:@"padding-right"])
 		{
-			[styles setObject:rightPadding forKey:@"padding-right"];
+			[styles setNilTolerantObject:rightPadding forNilTolerantKey:@"padding-right"];
 		}
 
 		if (![styles objectForKey:@"padding-bottom"])
 		{
-			[styles setObject:bottomPadding forKey:@"padding-bottom"];
+			[styles setNilTolerantObject:bottomPadding forNilTolerantKey:@"padding-bottom"];
 		}
 		
 		if (![styles objectForKey:@"padding-left"])
 		{
-			[styles setObject:leftPadding forKey:@"padding-left"];
+			[styles setNilTolerantObject:leftPadding forNilTolerantKey:@"padding-left"];
 		}
 		
 		// remove the shorthand
@@ -424,7 +425,7 @@ extern unsigned int default_css_len;
 				value = [value stringByReplacingCharactersInRange:rangeOfImportant withString:@""];
 				value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 				
-				[ruleDictionary setObject:value forKey:oneKey];
+				[ruleDictionary setNilTolerantObject:value forNilTolerantKey:oneKey];
 			}
 		}
 
@@ -451,12 +452,12 @@ extern unsigned int default_css_len;
 					// treat as HTML string, remove quotes
 					NSRange range = NSMakeRange(1, [value length]-2);
 					
-					value = [[value substringWithRange:range] stringByAddingHTMLEntities];
+					value = [[value substringWithRange:range outOfRange:@""] stringByAddingHTMLEntities];
 				}
 				
 				// prefix key with the pseudo selector
 				NSString *prefixedKey = [NSString stringWithFormat:@"%@:%@", pseudoSelector, oneRuleKey];
-				[ruleDictionary setObject:value forKey:prefixedKey];
+				[ruleDictionary setNilTolerantObject:value forNilTolerantKey:prefixedKey];
 				[ruleDictionary removeObjectForKey:oneRuleKey];
 			}
 		}
@@ -472,11 +473,11 @@ extern unsigned int default_css_len;
 			[tmpDict addEntriesFromDictionary:ruleDictionary];
 
 			// save it
-			[_styles setObject:tmpDict forKey:cleanSelector];
+			[_styles setNilTolerantObject:tmpDict forNilTolerantKey:cleanSelector];
 		}
 		else 
 		{
-			[_styles setObject:ruleDictionary forKey:cleanSelector];
+			[_styles setNilTolerantObject:ruleDictionary forNilTolerantKey:cleanSelector];
 		}
 	}
 }
@@ -492,7 +493,7 @@ extern unsigned int default_css_len;
 	
 	for (NSUInteger i = 0; i < length; i++)
 	{
-		unichar c = [css characterAtIndex:i];
+		unichar c = [css characterAtIndex:i outOfRange:0];
 		
 		if (c == '/')
 		{
@@ -500,7 +501,7 @@ extern unsigned int default_css_len;
 			
 			if (i < length)
 			{
-				c = [css characterAtIndex:i];
+				c = [css characterAtIndex:i outOfRange:0];
 				
 				if (c == '*')
 				{
@@ -508,7 +509,7 @@ extern unsigned int default_css_len;
 					
 					for (; i < length; i++)
 					{
-						if ([css characterAtIndex:i] == '/')
+						if ([css characterAtIndex:i outOfRange:0] == '/')
 						{
 							break;
 						}
@@ -541,7 +542,7 @@ extern unsigned int default_css_len;
 			if (braceLevel == 0) 
 			{
 				// Grab the selector (we'll process it in a moment)
-				selector = [css substringWithRange:NSMakeRange(braceMarker, i-braceMarker)];
+				selector = [css substringWithRange:NSMakeRange(braceMarker, i-braceMarker) outOfRange:@""];
 				
 				// And mark our position so we can grab the rule's CSS when it is closed
 				braceMarker = i + 1;
@@ -557,7 +558,7 @@ extern unsigned int default_css_len;
 			// If we finished a rule...
 			if (braceLevel == 1) 
 			{
-				NSString *rule = [css substringWithRange:NSMakeRange(braceMarker, i-braceMarker)];
+				NSString *rule = [css substringWithRange:NSMakeRange(braceMarker, i-braceMarker) outOfRange:@""];
 				
 				[self _addStyleRule:rule withSelector: selector];
 				
@@ -572,12 +573,17 @@ extern unsigned int default_css_len;
 
 - (void)mergeStylesheet:(DTCSSStylesheet *)stylesheet
 {
-	NSArray *otherStylesheetStyleKeys = [[stylesheet styles] allKeys];
+	[self mergeStyles:stylesheet.styles];
+}
+
+- (void)mergeStyles:(NSDictionary *)styles
+{
+    NSArray *otherStylesheetStyleKeys = [styles allKeys];
 	
 	for (NSString *oneKey in otherStylesheetStyleKeys)
 	{
 		NSDictionary *existingStyles = [_styles objectForKey:oneKey];
-		NSDictionary *stylesToMerge = [[stylesheet styles] objectForKey:oneKey];
+		NSDictionary *stylesToMerge = [styles objectForKey:oneKey];
 		if (existingStyles)
 		{
 			NSMutableDictionary *mutableStyles = [existingStyles mutableCopy];
@@ -586,15 +592,15 @@ extern unsigned int default_css_len;
 			{
 				NSString *mergingStyleString = [stylesToMerge objectForKey:oneStyleKey];
 				
-				[mutableStyles setObject:mergingStyleString forKey:oneStyleKey];
+				[mutableStyles setNilTolerantObject:mergingStyleString forNilTolerantKey:oneStyleKey];
 			}
 			
-			[_styles setObject:mutableStyles forKey:oneKey];
+			[_styles setNilTolerantObject:mutableStyles forNilTolerantKey:oneKey];
 		}
 		else
 		{
 			// nothing to worry
-			[_styles setObject:stylesToMerge forKey:oneKey];
+			[_styles setNilTolerantObject:stylesToMerge forNilTolerantKey:oneKey];
 		}
 	}
 }

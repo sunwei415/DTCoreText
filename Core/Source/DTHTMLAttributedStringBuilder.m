@@ -17,6 +17,8 @@
 #import "DTVersion.h"
 #import "NSString+DTFormatNumbers.h"
 
+#import "DTListItemHTMLElement.h"
+
 @interface DTHTMLAttributedStringBuilder ()
 
 - (void)_registerTagStartHandlers;
@@ -64,6 +66,13 @@
 	DTHTMLElement *_bodyElement;
 	DTHTMLElement *_currentTag;
 	BOOL _ignoreParseEvents; // ignores events from parser after first HTML tag was finished
+}
+
++ (void)initialize
+{
+    [super initialize];
+    
+    
 }
 
 - (id)initWithHTML:(NSData *)data options:(NSDictionary *)options documentAttributes:(NSDictionary **)docAttributes
@@ -128,22 +137,23 @@
 	}
 	
 	// custom option to use iOS 6 attributes if running on iOS 6
-	if ([[_options objectForKey:DTUseiOS6Attributes] boolValue])
-	{
-		if (![DTVersion osVersionIsLessThen:@"6.0"])
-		{
-			___useiOS6Attributes = YES;
-		}
-		else
-		{
-			___useiOS6Attributes = NO;
-		}
-	}
-	else
-	{
-		// default is not to use them because many features are not supported
-		___useiOS6Attributes = NO;
-	}
+    //comment by sunwei since we are not using it at all.
+//	if ([[_options objectForKey:DTUseiOS6Attributes] boolValue])
+//	{
+//		if (!SYSTEM_VERSION_LESS_THAN(@"6.0"))
+//		{
+//			___useiOS6Attributes = YES;
+//		}
+//		else
+//		{
+//			___useiOS6Attributes = NO;
+//		}
+//	}
+//	else
+//	{
+//		// default is not to use them because many features are not supported
+//		___useiOS6Attributes = NO;
+//	}
 	
 	// custom option to scale text
 	_textScale = [[_options objectForKey:NSTextSizeMultiplierDocumentOption] floatValue];
@@ -364,7 +374,7 @@
 		// remove line breaks and whitespace in links
 		NSString *cleanString = [[_currentTag attributeForKey:@"href"] stringByReplacingOccurrencesOfString:@"\n" withString:@""];
 		cleanString = [cleanString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-		
+        		
 		NSURL *link = [NSURL URLWithString:cleanString];
 		
 		// deal with relative URL
@@ -582,8 +592,24 @@
 	
 	void (^styleBlock)(void) = ^
 	{
-		DTCSSStylesheet *localSheet = [(DTStylesheetHTMLElement *)_currentTag stylesheet];
-		[_globalStyleSheet mergeStylesheet:localSheet];
+        
+        DTCSSStylesheet *localSheet = [(DTStylesheetHTMLElement *)_currentTag stylesheet];
+        
+        //coscico code: skip style sheet for list item
+        NSMutableDictionary * styles = [localSheet.styles mutableCopy];
+        
+        NSArray * keys = [styles allKeys];
+        
+        for (NSString * key in keys) {
+            if ([key rangeOfString:@"li."].location == 0) {
+                [styles removeObjectForKey:key];
+            }
+        }
+                    
+        [_globalStyleSheet mergeStyles:styles];
+        
+         //coscico code end
+		
 	};
 	
 	[_tagEndHandlers setObject:[styleBlock copy] forKey:@"style"];

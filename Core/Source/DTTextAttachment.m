@@ -162,7 +162,7 @@ static NSMutableDictionary *_classForTagNameLookup = nil;
 
 	if (previousClass)
 	{
-		NSLog(@"Warning: replacing previously registered class '%@' for tag name '%@' with '%@'", NSStringFromClass(previousClass), tagName, NSStringFromClass(class));
+//		NSLog(@"Warning: replacing previously registered class '%@' for tag name '%@' with '%@'", NSStringFromClass(previousClass), tagName, NSStringFromClass(class));
 	}
 	
 	[_classForTagNameLookup setObject:class forKey:tagName];
@@ -228,6 +228,12 @@ static NSMutableDictionary *_classForTagNameLookup = nil;
 	_displaySize = displaySize;
 }
 
+- (CGSize)displaySize
+{
+//    NSLog(@"getting displaySize");
+    return _displaySize;
+}
+
 @synthesize originalSize = _originalSize;
 @synthesize displaySize = _displaySize;
 @synthesize contentURL = _contentURL;
@@ -235,5 +241,15 @@ static NSMutableDictionary *_classForTagNameLookup = nil;
 @synthesize attributes = _attributes;
 @synthesize verticalAlignment = _verticalAlignment;
 @synthesize hyperLinkGUID = hyperLinkGUID;
+
+//coscico code
+- (CGFloat)ascentForLayoutInLine:(DTCoreTextLayoutLine *)line
+{
+    return [self ascentForLayout];
+}
+- (CGFloat)descentForLayoutInLine:(DTCoreTextLayoutLine *)line
+{
+    return [self descentForLayout];
+}
 
 @end

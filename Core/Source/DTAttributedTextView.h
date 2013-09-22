@@ -29,7 +29,7 @@
 /**
  The attributed text to be displayed in the text content view of the receiver.
  */
-@property (nonatomic, strong) NSAttributedString *attributedString;
+@property (nonatomic, strong) NSMutableAttributedString *attributedString;
 
 
 /**

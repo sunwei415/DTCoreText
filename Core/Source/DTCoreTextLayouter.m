@@ -8,6 +8,8 @@
 
 #import "DTCoreTextLayouter.h"
 
+#include "DTUtils.h"
+
 @interface DTCoreTextLayouter ()
 
 @property (nonatomic, strong) NSMutableArray *frames;
@@ -29,14 +31,14 @@
 @implementation DTCoreTextLayouter
 {
 	CTFramesetterRef _framesetter;
-	NSAttributedString *_attributedString;
+	NSMutableAttributedString *_attributedString;
 	BOOL _shouldCacheLayoutFrames;
 	NSCache *_layoutFrameCache;
 }
 
 @synthesize selfLock;
 
-- (id)initWithAttributedString:(NSAttributedString *)attributedString
+- (id)initWithAttributedString:(NSMutableAttributedString *)attributedString
 {
 	if ((self = [super init]))
 	{
@@ -104,7 +106,7 @@
 		// framesetter needs to go
 		if (_framesetter)
 		{
-			CFRelease(_framesetter);
+			CFNilTolerantRelease((__bridge id)(_framesetter));
 			_framesetter = NULL;
 		}
 	}
@@ -127,7 +129,7 @@
 	return _framesetter;
 }
 
-- (void)setAttributedString:(NSAttributedString *)attributedString
+- (void)setAttributedString:(NSMutableAttributedString *)attributedString
 {
 	SYNCHRONIZE_START(self)
 	{
@@ -144,7 +146,7 @@
 	SYNCHRONIZE_END(self)
 }
 
-- (NSAttributedString *)attributedString
+- (NSMutableAttributedString *)attributedString
 {
 	return _attributedString;
 }

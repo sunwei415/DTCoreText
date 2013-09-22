@@ -15,6 +15,9 @@
  */
 
 @interface DTImageTextAttachment : DTTextAttachment <DTTextAttachmentDrawing, DTTextAttachmentHTMLPersistence>
+{
+	DTImage * _image;
+}
 
 /**
  The designated initializer which will be called by [DTTextAttachment textAttachmentWithElement:options:] for image attachments.

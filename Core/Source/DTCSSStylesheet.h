@@ -58,6 +58,8 @@
  */
 - (void)mergeStylesheet:(DTCSSStylesheet *)stylesheet;
 
+//coscico code
+- (void)mergeStyles:(NSDictionary *)styles;
 
 /**
  @name Accessing Style Information

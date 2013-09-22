@@ -124,4 +124,10 @@
  */
 + (NSAttributedString *)prefixForListItemWithCounter:(NSUInteger)listCounter listStyle:(DTCSSListStyle *)listStyle listIndent:(CGFloat)listIndent attributes:(NSDictionary *)attributes;
 
+//coscico code
+- (NSAttributedString *)attributedSubstringFromRange:(NSRange)range outOfRange:(NSAttributedString *)valueWhenOutOfRange;
+- (NSRange)fullRange;
+
+- (BOOL)containsRange:(NSRange)range;
+
 @end

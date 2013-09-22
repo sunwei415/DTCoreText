@@ -7,7 +7,7 @@
 //
 
 #import "NSAttributedString+DTDebug.h"
-
+#import "NSString+DTUtilities.h"
 
 @implementation NSAttributedString (DTDebug)
 
@@ -17,7 +17,7 @@
 	
 	NSRange entireRange = NSMakeRange(0, [self length]);
 	[self enumerateAttribute:attribute inRange:entireRange options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
-		NSString *rangeString = [[self string] substringWithRange:range];
+		NSString *rangeString = [[self string] substringWithRange:range outOfRange:@""];
 		NSString *valueString;
 		
 		if ([value isKindOfClass:[NSArray class]])

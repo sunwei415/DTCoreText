@@ -32,7 +32,7 @@
 /**
  The attributed string content of the receiver
  */
-@property (nonatomic, strong) NSAttributedString *attributedString;
+@property (nonatomic, strong) NSMutableAttributedString *attributedString;
 
 /**
  A delegate implementing DTAttributedTextContentViewDelegate to provide custom subviews for images and links.

@@ -199,7 +199,7 @@
 		if ([self scanUpToString:@")" intoString:NULL])
 		{
 			self.scanLocation++;
-			colorName = [[self string] substringWithRange:NSMakeRange(indexBefore, self.scanLocation - indexBefore)];
+			colorName = [[self string] substringWithRange:NSMakeRange(indexBefore, self.scanLocation - indexBefore) outOfRange:@""];
 			
 			colorName = [colorName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 		}

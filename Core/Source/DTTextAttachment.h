@@ -13,7 +13,9 @@
 #endif
 
 @class DTHTMLElement;
-
+//coscico code begin
+@class DTCoreTextLayoutLine;
+//coscico code end
 typedef enum
 {
 	DTTextAttachmentVerticalAlignmentBaseline = 0,
@@ -175,5 +177,9 @@ typedef enum
  @returns The class to use for attachments with with tag name, or `nil` if this should not be an attachment
  */
 + (Class)registeredClassForTagName:(NSString *)tagName;
+
+- (CGFloat)ascentForLayoutInLine:(DTCoreTextLayoutLine *)line;
+- (CGFloat)descentForLayoutInLine:(DTCoreTextLayoutLine *)line;
+
 
 @end

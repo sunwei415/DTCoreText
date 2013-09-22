@@ -7,6 +7,7 @@
 //
 
 #import "NSMutableString+HTML.h"
+#import "NSString+DTUtilities.h"
 
 
 #define IS_WHITESPACE(_c) (_c == ' ' || _c == '\t' || _c == 0xA || _c == 0xB || _c == 0xC || _c == 0xD || _c == 0x85)
@@ -21,7 +22,7 @@
 	NSInteger index = lastIndex;
 	NSInteger whitespaceLength = 0;
 	
-	while (index>=0 && IS_WHITESPACE([self characterAtIndex:index])) 
+	while (index>=0 && IS_WHITESPACE([self characterAtIndex:index outOfRange:0]))
 	{
 		index--;
 		whitespaceLength++;

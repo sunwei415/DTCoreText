@@ -1,0 +1,33 @@
+PODS:
+  - DTFoundation (1.4.6):
+    - DTFoundation/AppKit
+    - DTFoundation/Core
+    - DTFoundation/DTHMLParser
+    - DTFoundation/DTReachability
+    - DTFoundation/DTSidePanel
+    - DTFoundation/DTSidePanel
+    - DTFoundation/DTSQLite
+    - DTFoundation/DTUTI
+    - DTFoundation/DTZipArchive
+    - DTFoundation/UIKit
+  - DTFoundation/Core (1.4.6)
+  - DTFoundation/DTHMLParser (1.4.6):
+    - DTFoundation/Core
+  - DTFoundation/DTReachability (1.4.6)
+  - DTFoundation/DTSidePanel (1.4.6):
+    - DTFoundation/UIKit
+  - DTFoundation/DTSQLite (1.4.6)
+  - DTFoundation/DTUTI (1.4.6)
+  - DTFoundation/DTZipArchive (1.4.6):
+    - DTFoundation/DTZipArchive/Minizip
+  - DTFoundation/DTZipArchive/Minizip (1.4.6)
+  - DTFoundation/UIKit (1.4.6):
+    - DTFoundation/Core
+
+DEPENDENCIES:
+  - DTFoundation (= 1.4.6)
+
+SPEC CHECKSUMS:
+  DTFoundation: 483c3ea0d24287ff3cbc0441199b6f7d79233d5a
+
+COCOAPODS: 0.25.0

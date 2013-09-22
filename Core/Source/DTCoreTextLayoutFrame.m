@@ -47,7 +47,7 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 		// determine correct target range
 		_requestedStringRange = range;
 		NSUInteger stringLength = [_attributedStringFragment length];
-		
+        		
 		if (_requestedStringRange.location >= stringLength)
 		{
 			return nil;
@@ -92,18 +92,29 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 {
 	if (_textFrame)
 	{
-		CFRelease(_textFrame);
+		CFNilTolerantRelease((__bridge id)(_textFrame));
 	}
 	
 	if (_framesetter)
 	{
-		CFRelease(_framesetter);
+		CFNilTolerantRelease((__bridge id)(_framesetter));
 	}
 }
 
 - (NSString *)description
 {
 	return [self.lines description];
+}
+
+//coscico code
+- (void)cleanOrInitLines
+{
+    if (!_lines) {
+        _lines = [[NSMutableArray alloc] init];
+    }
+	else {
+        [_lines removeAllObjects];
+    }
 }
 
 #pragma mark Building the Lines
@@ -114,15 +125,22 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 {
 	// framesetter keeps internal reference, no need to retain
 	CTTypesetterRef typesetter = CTFramesetterGetTypesetter(_framesetter);
-	
-	NSMutableArray *typesetLines = [NSMutableArray array];
-	
+    
+    [self cleanOrInitLines];
+    
 	CGPoint lineOrigin = _frame.origin;
 	
 	DTCoreTextLayoutLine *previousLine = nil;
 	
 	// need the paragraph ranges to know if a line is at the beginning of paragraph
-	NSMutableArray *paragraphRanges = [[self paragraphRanges] mutableCopy];
+    // coscico code begin
+//	NSMutableArray *paragraphRanges = [[self paragraphRanges] mutableCopy];
+    NSMutableArray *paragraphRanges = [self paragraphRanges];
+    // coscico code end
+    
+    if ([paragraphRanges count] == 0) {
+        return;
+    }
 	
 	NSRange currentParagraphRange = [[paragraphRanges objectAtIndex:0] rangeValue];
 	
@@ -161,13 +179,25 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 	
 	do 
 	{
-		while (lineRange.location >= (currentParagraphRange.location+currentParagraphRange.length)) 
-		{
-			// we are outside of this paragraph, so we go to the next
-			[paragraphRanges removeObjectAtIndex:0];
-			
-			currentParagraphRange = [[paragraphRanges objectAtIndex:0] rangeValue];
-		}
+        // coscico code begin
+//		while (lineRange.location >= (currentParagraphRange.location + currentParagraphRange.length)) 
+//		{
+//			// we are outside of this paragraph, so we go to the next
+//			[paragraphRanges removeObjectAtIndex:0];
+//			
+//			currentParagraphRange = [[paragraphRanges objectAtIndex:0] rangeValue];
+//		}
+        
+        for (NSUInteger index = 0; index < paragraphRanges.count; index++) {
+            
+            currentParagraphRange = [[paragraphRanges objectAtIndex:index] rangeValue];
+            
+            if (lineRange.location < currentParagraphRange.location + currentParagraphRange.length) {
+                break;
+            }
+            
+        }
+        // coscico code end
 		
 		BOOL isAtBeginOfParagraph = (currentParagraphRange.location == lineRange.location);
 		
@@ -235,8 +265,8 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 			CTParagraphStyleGetValueForSpecifier(paragraphStyle, kCTParagraphStyleSpecifierParagraphSpacing, sizeof(currentParaMetrics.paragraphSpacing), &currentParaMetrics.paragraphSpacing);
 		}
 		
-		truncateLine = ((self.numberOfLines>0 && [typesetLines count]+1==self.numberOfLines) ||
-						(_numberLinesFitInFrame>0 && _numberLinesFitInFrame==[typesetLines count]+1));
+		truncateLine = ((self.numberOfLines>0 && [_lines count]+1==self.numberOfLines) ||
+						(_numberLinesFitInFrame>0 && _numberLinesFitInFrame==[_lines count]+1));
 		CTLineRef line;
 		if(!truncateLine)
 		{
@@ -279,8 +309,8 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 			line = CTLineCreateTruncatedLine(baseLine, availableSpace, truncationType, elipsisLineRef);
 			
 			// clean up
-			CFRelease(baseLine);
-			CFRelease(elipsisLineRef);
+			CFNilTolerantRelease((__bridge id)(baseLine));
+			CFNilTolerantRelease((__bridge id)(elipsisLineRef));
 		}
 		
 		// we need all metrics so get the at once
@@ -467,7 +497,7 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 			case kCTJustifiedTextAlignment:
 			{
 				BOOL isAtEndOfParagraph    = (currentParagraphRange.location+currentParagraphRange.length <= lineRange.location+lineRange.length ||
-					[[_attributedStringFragment string] characterAtIndex:lineRange.location+lineRange.length-1]==0x2028);
+                                              [[_attributedStringFragment string] characterAtIndex:lineRange.location+lineRange.length-1 outOfRange:0]==0x2028);
 
 				// only justify if not last line, not <br>, and if the line width is longer than 60% of the frame
 				// avoids over-stretching
@@ -475,7 +505,7 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 				{
 					// create a justified line and replace the current one with it
 					CTLineRef justifiedLine = CTLineCreateJustifiedLine(line, 1.0f, availableSpace);
-					CFRelease(line);
+					CFNilTolerantRelease((__bridge id)(line));
 					line = justifiedLine;
 				}
 				
@@ -493,10 +523,14 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 				break;
 			}
 		}
+        
+        if (!line) {
+            continue;
+        }
 		
 		// wrap it
 		DTCoreTextLayoutLine *newLine = [[DTCoreTextLayoutLine alloc] initWithLine:line];
-		CFRelease(line);
+		CFNilTolerantRelease((__bridge id)(line));
 		
 		newLine.writingDirectionIsRightToLeft = isRTL;
 		
@@ -523,9 +557,9 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 		
 		if (lineBottom>maxY)
 		{
-			if ([typesetLines count] && self.lineBreakMode)
+			if ([_lines count] && self.lineBreakMode)
 			{
-				_numberLinesFitInFrame = [typesetLines count];
+				_numberLinesFitInFrame = [_lines count];
 				[self _buildLinesWithTypesetter];
 				return;
 			}
@@ -536,7 +570,7 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 			}
 		}
 		
-		[typesetLines addObject:newLine];
+		[_lines addObject:newLine];
 		fittingLength += lineRange.length;
 		
 		lineRange.location += lineRange.length;
@@ -544,7 +578,7 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 	}
 	while (lineRange.location < maxIndex && !truncateLine);
 	
-	_lines = typesetLines;
+//	_lines = typesetLines;
 	
 	if (![_lines count])
 	{
@@ -583,8 +617,10 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 	
 	CGPoint *origins = malloc(sizeof(CGPoint)*CFArrayGetCount(cflines));
 	CTFrameGetLineOrigins(_textFrame, CFRangeMake(0, 0), origins);
+    
+    [self cleanOrInitLines];
 	
-	NSMutableArray *tmpLines = [[NSMutableArray alloc] initWithCapacity:CFArrayGetCount(cflines)];
+//	NSMutableArray *tmpLines = [[NSMutableArray alloc] initWithCapacity:CFArrayGetCount(cflines)];
 	
 	NSInteger lineIndex = 0;
 	
@@ -598,13 +634,13 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 		DTCoreTextLayoutLine *newLine = [[DTCoreTextLayoutLine alloc] initWithLine:(__bridge CTLineRef)oneLine];
 		newLine.baselineOrigin = lineOrigin;
 		
-		[tmpLines addObject:newLine];
+		[_lines addObject:newLine];
 		
 		lineIndex++;
 	}
 	free(origins);
 	
-	_lines = tmpLines;
+//	_lines = tmpLines;
 	
 	// need to get the visible range here
 	CFRange fittingRange = CTFrameGetStringRange(_textFrame);
@@ -626,52 +662,60 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 	//[self _buildLinesWithStandardFramesetter];
 }
 
-- (NSArray *)lines
+- (NSMutableArray *)lines
 {
-	if (!_lines)
-	{
-		[self _buildLines];
-	}
+    @synchronized(_lines){
+        
+        if (!_lines || ![_lines count])
+        {
+            [self _buildLines];
+        }
 	
-	return _lines;
+        return _lines;
+    }
 }
 
 - (NSArray *)linesVisibleInRect:(CGRect)rect
 {
-	NSMutableArray *tmpArray = [NSMutableArray arrayWithCapacity:[self.lines count]];
 	
-	CGFloat minY = CGRectGetMinY(rect);
-	CGFloat maxY = CGRectGetMaxY(rect);
-	
-	for (DTCoreTextLayoutLine *oneLine in self.lines)
-	{
-		CGRect lineFrame = oneLine.frame;
-		
-		// lines before the rect
-		if (CGRectGetMaxY(lineFrame)<minY)
-		{
-			// skip
-			continue;
-		}
-		
-		// line is after the rect
-		if (lineFrame.origin.y > maxY)
-		{
-			break;
-		}
+	__block CGFloat minY = CGRectGetMinY(rect);
+	__block CGFloat maxY = CGRectGetMaxY(rect);
+    
+    NSArray * visibleLines = [NSArray array];
+    
+    @synchronized(self.lines){
+        
+       visibleLines = [self.lines filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
+            
+            DTCoreTextLayoutLine * oneLine = (DTCoreTextLayoutLine *)evaluatedObject;
+            
+            CGRect lineFrame = oneLine.frame;
+            
+            BOOL lineIsBeforeTheRect = CGRectGetMaxY(lineFrame)<minY;
+            
+            if (lineIsBeforeTheRect) {
+                return NO;
+            }
+            
+            BOOL lineIsAfterTheRect = lineFrame.origin.y > maxY;
+            
+            if (lineIsAfterTheRect) {
+                return NO;
+            }
+            
+            // CGRectIntersectsRect returns false if the frame has 0 width, which
+            // lines that consist only of line-breaks have. Set the min-width
+            // to one to work-around.
+            lineFrame.size.width = lineFrame.size.width>1 ? lineFrame.size.width : 1;
+            
+            BOOL lineFrameIntersectsWithRect = CGRectIntersectsRect(rect, lineFrame);
+            
+            return lineFrameIntersectsWithRect;
+            
+       }]];
+    }
 
-		// CGRectIntersectsRect returns false if the frame has 0 width, which
-		// lines that consist only of line-breaks have. Set the min-width
-		// to one to work-around.
-		lineFrame.size.width = lineFrame.size.width>1?lineFrame.size.width:1;
-		
-		if (CGRectIntersectsRect(rect, lineFrame))
-		{
-			[tmpArray addObject:oneLine];
-		}
-	}
-	
-	return tmpArray;
+    return visibleLines;
 }
 
 - (NSArray *)linesContainedInRect:(CGRect)rect
@@ -1171,7 +1215,7 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 	
 	if (_textFrame)
 	{
-		CFRelease(_textFrame);
+		CFNilTolerantRelease((__bridge id)(_textFrame));
 	}
 	
 	UIGraphicsPopContext();
@@ -1405,7 +1449,7 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 	}
 	
 	NSInteger prevLineLastUnicharIndex =lineRange.location - 1;
-	unichar prevLineLastUnichar = [[_attributedStringFragment string] characterAtIndex:prevLineLastUnicharIndex];
+	unichar prevLineLastUnichar = [[_attributedStringFragment string] characterAtIndex:prevLineLastUnicharIndex outOfRange:0];
 	
 	return [[NSCharacterSet newlineCharacterSet] characterIsMember:prevLineLastUnichar];
 }
@@ -1413,7 +1457,7 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 // returns YES if the given line is the last in a paragraph
 - (BOOL)isLineLastInParagraph:(DTCoreTextLayoutLine *)line
 {
-	NSString *lineString = [[_attributedStringFragment string] substringWithRange:line.stringRange];
+	NSString *lineString = [[_attributedStringFragment string] substringWithRange:line.stringRange outOfRange:@""];
 	
 	if ([lineString hasSuffix:@"\n"])
 	{
@@ -1594,6 +1638,12 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 	if (stringRange.length)
 	{
 		lastParagraphIndex = [self paragraphIndexContainingStringIndex:NSMaxRange(stringRange)-1];
+        
+        //coscico code
+        //for the second stack trace in issue #1377: https://bitbucket.org/znafets/ila/issue/1377/crash-in-rtf-editor
+        if (lastParagraphIndex == NSNotFound) {
+            lastParagraphIndex = firstParagraphIndex;
+        }
 	}
 	else
 	{
@@ -1616,27 +1666,29 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 }
 
 #pragma mark Properties
-- (NSAttributedString *)attributedStringFragment
+- (NSMutableAttributedString *)attributedStringFragment
 {
 	return _attributedStringFragment;
 }
 
 // builds an array
-- (NSArray *)paragraphRanges
+- (NSMutableArray *)paragraphRanges
 {
-	if (!_paragraphRanges)
+	if (!_paragraphRanges || _paragraphRanges.count == 0)
 	{
+        if (!_paragraphRanges) {
+            _paragraphRanges = [NSMutableArray array];
+        }
+        
 		NSString *plainString = [[self attributedStringFragment] string];
 		NSUInteger length = [plainString length];
 		
 		NSRange paragraphRange = [plainString rangeOfParagraphsContainingRange:NSMakeRange(0, 0) parBegIndex:NULL parEndIndex:NULL];
 
-		NSMutableArray *tmpArray = [NSMutableArray array];
-
 		while (paragraphRange.length)
 		{
 			NSValue *value = [NSValue valueWithRange:paragraphRange];
-			[tmpArray addObject:value];
+			[_paragraphRanges addObject:value];
 			
 			NSUInteger nextParagraphBegin = NSMaxRange(paragraphRange);
 			
@@ -1648,9 +1700,7 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 			// next paragraph
 			paragraphRange = [plainString rangeOfParagraphsContainingRange:NSMakeRange(nextParagraphBegin, 0) parBegIndex:NULL parEndIndex:NULL];
 		}
-		
-		_paragraphRanges = tmpArray; // no copy for performance
-	}
+    }
 	
 	return _paragraphRanges;
 }
@@ -1661,7 +1711,7 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 	 {
 		_numberOfLines = numberOfLines;
         // clear lines cache
-        _lines = nil;
+        [_lines removeAllObjects];
     }
 }
 
@@ -1671,7 +1721,7 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
 	 {
         _lineBreakMode = lineBreakMode;
         // clear lines cache
-        _lines = nil;
+        [_lines removeAllObjects];
     }
 }
 
@@ -1684,7 +1734,7 @@ static BOOL _DTCoreTextLayoutFramesShouldDrawDebugFrames = NO;
         if( self.numberOfLines > 0 )
 		  {
             // clear lines cache
-            _lines = nil;
+            [_lines removeAllObjects];
         }
     }
 }

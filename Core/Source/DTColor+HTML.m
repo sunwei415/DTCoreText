@@ -8,6 +8,7 @@
 
 #import "DTColor+HTML.h"
 #import "NSString+HTML.h"
+#import "NSString+DTUtilities.h"
 
 static NSDictionary *colorLookup = nil;
 
@@ -25,9 +26,9 @@ static NSDictionary *colorLookup = nil;
 	NSUInteger digits = [hex length]/3;
 	CGFloat maxValue = (digits==1)?15.0:255.0;
 	
-	CGFloat red = [[hex substringWithRange:NSMakeRange(0, digits)] integerValueFromHex]/maxValue;
-	CGFloat green = [[hex substringWithRange:NSMakeRange(digits, digits)] integerValueFromHex]/maxValue;
-	CGFloat blue = [[hex substringWithRange:NSMakeRange(2*digits, digits)] integerValueFromHex]/maxValue;
+	CGFloat red = [[hex substringWithRange:NSMakeRange(0, digits) outOfRange:@"00"] integerValueFromHex]/maxValue;
+	CGFloat green = [[hex substringWithRange:NSMakeRange(digits, digits) outOfRange:@"00"] integerValueFromHex]/maxValue;
+	CGFloat blue = [[hex substringWithRange:NSMakeRange(2*digits, digits) outOfRange:@"00"] integerValueFromHex]/maxValue;
 	
 	return [UIColor colorWithRed:red green:green blue:blue alpha:1.0];
 }

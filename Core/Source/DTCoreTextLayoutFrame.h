@@ -45,11 +45,11 @@ typedef enum
 {
 	CGRect _frame;
 
-	NSArray *_lines;
-	NSArray *_paragraphRanges;
+//	NSMutableArray *_lines;
+//	NSMutableArray *_paragraphRanges;
 
 	NSArray *_textAttachments;
-	NSAttributedString *_attributedStringFragment;
+	NSMutableAttributedString *_attributedStringFragment;
 }
 
 
@@ -91,7 +91,7 @@ typedef enum
 /**
  This is a copy of the attributed string owned by the layouter of the receiver.
 */
-- (NSAttributedString *)attributedStringFragment;
+- (NSMutableAttributedString *)attributedStringFragment;
 
 
 /**
@@ -186,7 +186,7 @@ typedef enum
 /**
  The text lines that belong to the receiver.
  */
-@property (nonatomic, strong, readonly) NSArray *lines;
+@property (nonatomic, strong, readwrite) NSMutableArray *lines;
 
 
 /**
@@ -302,7 +302,8 @@ typedef enum
 /**
  An array of `NSRange` values encapsulated in `NSValue` instances. Each range is the string range contained in the corresponding paragraph.
 */
-@property (nonatomic, strong, readonly) NSArray *paragraphRanges;
+//coscico change from readonly to readwrite
+@property (nonatomic, strong) NSMutableArray *paragraphRanges;
 
 
 /**
@@ -350,5 +351,7 @@ typedef enum
  Flag to supress leading whitespace above fist line
  */
 @property(nonatomic, assign)BOOL noLeadingOnFirstLine;
+
+- (void)cleanOrInitLines;
 
 @end

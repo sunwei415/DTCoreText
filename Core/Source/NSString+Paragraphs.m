@@ -7,6 +7,7 @@
 //
 
 #import "NSString+Paragraphs.h"
+#import "NSString+DTUtilities.h"
 
 @implementation NSString (Paragraphs)
 
@@ -42,7 +43,7 @@
 	}
 	
 	// beginning of any other paragraph is after NL
-	if ([self characterAtIndex:index-1] == '\n')
+	if ([self characterAtIndex:index-1 outOfRange:0] == '\n')
 	{
 		return YES;
 	}
@@ -62,7 +63,7 @@
 	
 	for (int i=0; i<[self length]; i++)
 	{
-		if ([self characterAtIndex:i] == '\n')
+		if ([self characterAtIndex:i outOfRange:0] == '\n')
 		{
 			retValue++;
 		}

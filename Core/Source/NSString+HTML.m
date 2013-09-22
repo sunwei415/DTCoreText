@@ -70,7 +70,7 @@ static NSDictionary *entityReverseLookup = nil;
 	for (NSInteger i = 0; i<stringLength; i++)
 	{
 		// c-array access is faster because it saves objc calls
-		unichar oneChar = _characters[i]; // [self characterAtIndex:i];
+		unichar oneChar = _characters[i]; // [self characterAtIndex:i outOfRange:0];
 		
 		// of whitespace chars only output one space for first
 		if (IS_WHITESPACE(oneChar))
@@ -109,7 +109,7 @@ static NSDictionary *entityReverseLookup = nil;
 		return NO;
 	}
 	
-	unichar firstChar = [self characterAtIndex:0];
+	unichar firstChar = [self characterAtIndex:0 outOfRange:0];
 	
 	return [characterSet characterIsMember:firstChar];
 }
@@ -121,7 +121,7 @@ static NSDictionary *entityReverseLookup = nil;
 		return NO;
 	}
 	
-	unichar lastChar = [self characterAtIndex:[self length]-1];
+	unichar lastChar = [self characterAtIndex:[self length]-1 outOfRange:0];
 	
 	return [characterSet characterIsMember:lastChar];
 }
@@ -389,7 +389,7 @@ static NSDictionary *entityReverseLookup = nil;
 	
 	for (NSUInteger i = 0; i<[self length]; i++)
 	{
-		unichar oneChar = [self characterAtIndex:i];
+		unichar oneChar = [self characterAtIndex:i outOfRange:0];
 		
 		NSNumber *subKey = [NSNumber numberWithInteger:oneChar];
 		NSString *entity = [entityReverseLookup objectForKey:subKey];
@@ -408,7 +408,7 @@ static NSDictionary *entityReverseLookup = nil;
 			else if (CFStringIsSurrogateHighCharacter(oneChar) && i < [self length]-1)
 			{
 				i++;
-				unichar surrogateLowChar = [self characterAtIndex:i];
+				unichar surrogateLowChar = [self characterAtIndex:i outOfRange:0];
 				UTF32Char u32code = CFStringGetLongCharacterForSurrogatePair(oneChar, surrogateLowChar);
 				[tmpString appendFormat:@"&#%lu;", (unsigned long)u32code];
 			}

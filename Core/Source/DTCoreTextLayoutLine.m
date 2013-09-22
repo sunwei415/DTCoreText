@@ -14,6 +14,8 @@
 #import "DTCoreTextConstants.h"
 #import <UIKit/UIKit.h>
 
+#include "DTUtils.h"
+
 @interface DTCoreTextLayoutLine ()
 
 @property (nonatomic, strong) NSArray *glyphRuns;
@@ -43,6 +45,10 @@
 
 - (id)initWithLine:(CTLineRef)line
 {
+    if (!line) {
+        return nil;
+    }
+    
 	if ((self = [super init]))
 	{
 		_line = line;
@@ -56,7 +62,7 @@
 
 - (void)dealloc
 {
-	CFRelease(_line);
+	CFNilTolerantRelease((__bridge id)(_line));
 }
 
 - (NSString *)description
@@ -119,7 +125,7 @@
 	
 	DTCoreTextLayoutLine *newLine = [[DTCoreTextLayoutLine alloc] initWithLine:justifiedLine];
 	
-	CFRelease(justifiedLine);
+	CFNilTolerantRelease((__bridge id)(justifiedLine));
 	
 	return newLine;
 }

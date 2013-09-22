@@ -122,7 +122,7 @@ typedef NSUInteger DTAttributedTextContentViewRelayoutMask;
 
 @interface DTAttributedTextContentView : UIView
 {
-	NSAttributedString *_attributedString;
+	NSMutableAttributedString *_attributedString;
 	DTCoreTextLayoutFrame *_layoutFrame;
 	
 	UIEdgeInsets _edgeInsets;
@@ -137,6 +137,8 @@ typedef NSUInteger DTAttributedTextContentViewRelayoutMask;
 	NSAttributedString *_truncationString;
 }
 
+
+- (void)redrawTiledLayer;
 
 /**
  @name Sizing
@@ -225,7 +227,7 @@ typedef NSUInteger DTAttributedTextContentViewRelayoutMask;
 /**
  The attributed string to display in the receiver
  */
-@property (nonatomic, copy) NSAttributedString *attributedString;
+@property (nonatomic, copy) NSMutableAttributedString *attributedString;
 
 
 /**
@@ -333,6 +335,7 @@ typedef NSUInteger DTAttributedTextContentViewRelayoutMask;
  @returns A `UIImage` with the specified content
  */
 - (UIImage *)contentImageWithBounds:(CGRect)bounds options:(DTCoreTextLayoutFrameDrawingOptions)options;
+
 
 @end
 

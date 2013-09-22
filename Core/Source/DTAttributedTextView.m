@@ -25,7 +25,7 @@
 
 	// these are pass-through, i.e. store until the content view is created
 	DT_WEAK_VARIABLE id textDelegate;
-	NSAttributedString *_attributedString;
+	NSMutableAttributedString *_attributedString;
 	
 	BOOL _shouldDrawLinks;
 	BOOL _shouldDrawImages;
@@ -157,7 +157,7 @@
 	
 	// ignore possibly delayed layout notification for a different width
 	if (optimalFrame.size.width == frame.size.width)
-	{
+	{        
 		_attributedTextContentView.frame = optimalFrame;
 		self.contentSize = [_attributedTextContentView intrinsicContentSize];
 	}
@@ -322,7 +322,7 @@
 	}
 }
 
-- (void)setAttributedString:(NSAttributedString *)string
+- (void)setAttributedString:(NSMutableAttributedString *)string
 {
 	_attributedString = string;
 
@@ -340,6 +340,10 @@
 
 - (NSAttributedString *)attributedString
 {
+    if (self.attributedTextContentView.layoutFrame.attributedStringFragment) {
+        return self.attributedTextContentView.layoutFrame.attributedStringFragment;
+    }
+    
 	return _attributedString;
 }
 

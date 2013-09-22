@@ -11,6 +11,7 @@
 #import "DTVersion.h"
 #import "NSDictionary+DTCoreText.h"
 
+
 @implementation DTHTMLWriter
 {
 	NSAttributedString *_attributedString;
@@ -38,14 +39,15 @@
 		
 #if DTCORETEXT_SUPPORT_NS_ATTRIBUTES
 		// if running on iOS6 or higher
-		if ([DTVersion osVersionIsLessThen:@"6.0"])
-		{
-			_iOS6TagsPossible = NO;
-		}
-		else
-		{
-			_iOS6TagsPossible = YES;
-		}
+        //commented by sunwei, we don't use the iOS 6 only tag
+//		if ([DTVersion osVersionIsLessThen:@"6.0"])
+//		{
+//			_iOS6TagsPossible = NO;
+//		}
+//		else
+//		{
+//			_iOS6TagsPossible = YES;
+//		}
 #endif
 	}
 	
@@ -270,6 +272,14 @@
 	{
 		NSString *oneParagraph = [paragraphs objectAtIndex:i];
 		NSRange paragraphRange = NSMakeRange(location, [oneParagraph length]);
+        
+        //coscico code begin
+        NSAttributedString * fragment = [_attributedString attributedSubstringFromRange:paragraphRange outOfRange:nil];
+        
+        NSArray * listStyles = oneParagraph.length ? [fragment attribute:DTTextListsAttribute atIndex:0 effectiveRange:NULL] : nil;
+        
+        DTCSSListStyle *listStyle = listStyles.count ? [listStyles lastObject] : nil;
+        //coscico code end
 		
 		// skip empty paragraph at the end
 		if (i==[paragraphs count]-1)
@@ -307,6 +317,7 @@
 		DTCoreTextParagraphStyle *paragraphStyle = [paraAttributes paragraphStyle];
 		NSString *paraStyleString = nil;
 		
+        //coscico: skip paragraph style for list item
 		if (paragraphStyle)
 		{
 			if (_textScale!=1.0f)
@@ -321,6 +332,10 @@
 				paragraphStyle.headIndent = roundf(paragraphStyle.headIndent / _textScale);
 				paragraphStyle.tailIndent = roundf(paragraphStyle.tailIndent / _textScale);
 			}
+            
+            if (listStyle) {
+                paragraphStyle.headIndent = 0.0;
+            }
 			
 			paraStyleString = [paragraphStyle cssStyleRepresentation];
 		}
@@ -466,7 +481,7 @@
 		{
 			NSDictionary *attributes = [_attributedString attributesAtIndex:index longestEffectiveRange:&effectiveRange inRange:paragraphRange];
 			
-			NSString *plainSubString =[plainString substringWithRange:effectiveRange];
+			NSString *plainSubString = [plainString substringWithRange:effectiveRange outOfRange:@""];
 			
 			if (effectiveListStyle && needsToRemovePrefix)
 			{
@@ -500,7 +515,7 @@
 			
 			
 			if (attachment)
-			{
+			{                
 				if ([attachment conformsToProtocol:@protocol(DTTextAttachmentHTMLPersistence)])
 				{
 					id<DTTextAttachmentHTMLPersistence> persistableAttachment = (id<DTTextAttachmentHTMLPersistence>)attachment;
@@ -509,9 +524,18 @@
 					
 					if (HTMLString)
 					{
-						[retString appendString:HTMLString];
+                        NSURL *url = [attributes objectForKey:DTLinkAttribute];
+                        
+                        if (url)
+                        {
+                            [retString appendFormat:@"<a href=\"%@\">%@</a>", [url relativeString], HTMLString];
+                        }
+                        else
+                        {
+                            [retString appendString:HTMLString];
+                        }						
 					}
-				}
+				}                
 				
 				continue;
 			}
@@ -621,11 +645,14 @@
 				{
 					NSString *className = [self _styleClassForElement:@"a" style:fontStyle];
 					
+                    // coscico code begin
+                    // CHANGE: relativeString -->> absoluteString
 					if (fragment) {
-						[retString appendFormat:@"<a style=\"%@\" href=\"%@\">%@</a>", fontStyle, [url relativeString], subString];
+						[retString appendFormat:@"<a style=\"%@\" href=\"%@\">%@</a>", fontStyle, [url absoluteString], subString];
 					} else {
-						[retString appendFormat:@"<a class=\"%@\" href=\"%@\">%@</a>", className, [url relativeString], subString];
+						[retString appendFormat:@"<a class=\"%@\" href=\"%@\">%@</a>", className, [url absoluteString], subString];
 					}
+                    // coscico code end
 				}
 				else
 				{

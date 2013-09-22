@@ -35,6 +35,7 @@
 #import "NSScanner+HTML.h"
 #import "NSString+CSS.h"
 #import "NSString+HTML.h"
+#import "NSString+DTUtilities.h"
 #import "NSString+Paragraphs.h"
 
 // parsing classes
@@ -72,4 +73,6 @@
 #import "UIFont+DTCoreText.h"
 
 #endif
+
+
 

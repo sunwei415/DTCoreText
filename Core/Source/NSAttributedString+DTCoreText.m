@@ -75,7 +75,7 @@
 	NSRange totalRange = [self rangeOfTextList:outermostList atIndex:location];
 	
 	// get naked NSString
-    NSString *string = [[self string] substringWithRange:totalRange];
+    NSString *string = [[self string] substringWithRange:totalRange outOfRange:@""];
 	
     // entire string
     NSRange range = NSMakeRange(0, [string length]);
@@ -406,7 +406,10 @@
 		if (image)
 		{
 			// make an attachment for the image
-			DTImageTextAttachment *attachment = [[DTImageTextAttachment alloc] init];
+            Class ImageAttachmentClass = [DTTextAttachment registeredClassForTagName:@"img"];
+            NSAssert([ImageAttachmentClass isSubclassOfClass:[DTImageTextAttachment class]], @"DTRichTextEditor requires DTImageTextAttachment or a subclass of it be registered for 'img' tags.");
+            
+			DTImageTextAttachment *attachment = [[ImageAttachmentClass alloc] init];
 			attachment.image = image;
 			attachment.displaySize = image.size;
 			
@@ -433,6 +436,26 @@
 	}
 	
 	return nil;
+}
+
+- (NSAttributedString *)attributedSubstringFromRange:(NSRange)range outOfRange:(NSAttributedString *)valueWhenOutOfRange
+{    
+    if (NSRangeContainsRange([self fullRange], range)) {
+        return [self attributedSubstringFromRange:range];
+    }
+    else {
+        return valueWhenOutOfRange;
+    }
+}
+
+- (NSRange)fullRange
+{
+    return (NSRange){0, [self length]};
+}
+
+- (BOOL)containsRange:(NSRange)range
+{
+    return NSRangeContainsRange(self.fullRange, range);
 }
 
 @end

@@ -67,8 +67,8 @@
 	[super applyStyleDictionary:styles];
 	
 	CGFloat parentPadding = self.parentElement->_listIndent;
-	CGFloat listIndents = [self _sumOfListIndents];
 	
+    CGFloat listIndents = [self _sumOfListIndents];
 	self.paragraphStyle.headIndent = listIndents + _padding.left + _margins.left;
 	self.paragraphStyle.firstLineHeadIndent = self.paragraphStyle.headIndent;
 	
@@ -231,8 +231,10 @@
 	
 	if (image)
 	{
+        Class ImageAttachmentClass = [DTTextAttachment registeredClassForTagName:@"img"];
+        NSAssert([ImageAttachmentClass isSubclassOfClass:[DTImageTextAttachment class]], @"DTRichTextEditor requires DTImageTextAttachment or a subclass of it be registered for 'img' tags.");
 		// make an attachment for the image
-		DTImageTextAttachment *attachment = [[DTImageTextAttachment alloc] init];
+		DTImageTextAttachment *attachment = [[ImageAttachmentClass alloc] init];
 		attachment.image = image;
 		attachment.displaySize = image.size;
 		
@@ -261,13 +263,15 @@
 
 	CTLineRef tmpLine = CTLineCreateWithAttributedString((__bridge CFAttributedStringRef)(tmpAttributedString));
 	double width = CTLineGetTypographicBounds(tmpLine, NULL, NULL, NULL);
-	CFRelease(tmpLine);
+	CFNilTolerantRelease((__bridge id)(tmpLine));
 	
-	// if the non-whitespace characters are too wide then we omit the prefix
-	if ((width+5.0)>_margins.left)
-	{
-		return nil;
-	}
+    // coscico code begin
+//	// if the non-whitespace characters are too wide then we omit the prefix
+//	if ((width+5.0)>_margins.left)
+//	{
+//		return nil;
+//	}
+    // coscico code end
 	
 	return tmpStr;
 }

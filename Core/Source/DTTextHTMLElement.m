@@ -8,6 +8,7 @@
 
 #import "DTTextHTMLElement.h"
 #import "NSString+HTML.h"
+#import "NSString+DTUtilities.h"
 #import "DTCoreTextFontDescriptor.h"
 #import "NSAttributedString+SmallCaps.h"
 
@@ -50,7 +51,7 @@
 			// PRE ignores the last \n
 			if ([text hasSuffix:@"\n"])
 			{
-				text = [text substringWithRange:NSMakeRange(0, [text length]-1)];
+				text = [text substringWithRange:NSMakeRange(0, [text length]-1) outOfRange:@""];
 			}
 			
 			// replace paragraph breaks with line breaks
